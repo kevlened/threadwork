@@ -1,0 +1,35 @@
+{
+  "name": "needlework",
+  "version": "0.0.1",
+  "main": "index.js",
+  "engines": {
+    "node": ">=12"
+  },
+  "keywords": [
+    "nodejs",
+    "async",
+    "promise",
+    "worker_threads",
+    "worker",
+    "thread",
+    "pool",
+    "threadpool",
+    "multi threading"
+  ],
+  "scripts": {
+    "test": "node test.js",
+    "release": "yarn test && git commit -am $npm_package_version && git tag $npm_package_version && git push && git push --tags && npm login && npm publish"
+  },
+  "repository": "git@github.com:kevlened/needlework.git",
+  "author": "Len Boyette <boyettel@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/kevlened/needlework/issues"
+  },
+  "dependencies": {
+    "callsites": "^3.1.0"
+  },
+  "devDependencies": {
+    "uvu": "^0.3.3"
+  }
+}
