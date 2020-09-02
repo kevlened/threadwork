@@ -1,3 +1,4 @@
+/// <reference types="node" />
 export type ThreadPoolArgs = {
     /**
      * - Function to run in each thread.
@@ -8,9 +9,8 @@ export type ThreadPoolArgs = {
      */
     size?: number;
 };
-declare const ThreadPool_base: any;
+declare const ThreadPool_base: typeof import("events").EventEmitter;
 export class ThreadPool extends ThreadPool_base {
-    [x: string]: any;
     /**
      * Create a thread pool that runs a specific function
      *
