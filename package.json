@@ -15,7 +15,11 @@
     "thread",
     "pool",
     "threadpool",
-    "multi threading"
+    "multi threading",
+    "typescript",
+    "fast",
+    "worker threads",
+    "thread pool"
   ],
   "scripts": {
     "test": "node test.js",
