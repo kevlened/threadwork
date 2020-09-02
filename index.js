@@ -27,9 +27,19 @@ class ThreadPool extends EventEmitter {
 	#workers;
 	#available;
 	#queue = [];
+
+	/**
+	 * Determines if you're currently running in the main or thread context
+	 * @type {boolean}
+	 * */
 	isMainThread = isMainThread;
 
-	constructor({ task, size } = {}) {
+	/**
+	 * Create a thread pool that runs a specific function
+	 * 
+	 * @param {ThreadPoolArgs}
+	 */
+	constructor({ task, size }) {
 		super();
 
 		// If it's a worker thread
@@ -100,6 +110,12 @@ class ThreadPool extends EventEmitter {
 		this.#workers = workers;
 	}
 
+	/**
+	 * Create a thread pool that runs a specific function
+	 * 
+	 * @param {...object} args - Arguments passed to the configured task.
+	 * @returns {Promise<any>}
+	 */
 	async run(...args) {
 		if (!isMainThread) {
 			throw new Error('Cannot call `Pool.run` from thread');
@@ -162,3 +178,10 @@ class ThreadPool extends EventEmitter {
 module.exports = {
 	ThreadPool
 };
+
+/**
+ * @typedef ThreadPoolArgs
+ * @type {object}
+ * @property {function} task - Function to run in each thread.
+ * @property {number} [size] - Number of threads
+ */

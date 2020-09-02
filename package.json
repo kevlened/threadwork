@@ -2,6 +2,7 @@
   "name": "needlework",
   "version": "0.1.0",
   "main": "index.js",
+  "types": "index.d.ts",
   "engines": {
     "node": ">=12"
   },
@@ -18,7 +19,8 @@
   ],
   "scripts": {
     "test": "node test.js",
-    "release": "yarn test && git commit -am $npm_package_version && git tag $npm_package_version && git push && git push --tags && npm login && npm publish"
+    "types": "tsc index.js --declaration --allowJs --emitDeclarationOnly",
+    "release": "yarn test && yarn types && git commit -am $npm_package_version && git tag $npm_package_version && git push && git push --tags && npm login && npm publish"
   },
   "repository": "git@github.com:kevlened/needlework.git",
   "author": "Len Boyette <boyettel@gmail.com>",
@@ -30,6 +32,7 @@
     "callsites": "^3.1.0"
   },
   "devDependencies": {
+    "typescript": "^4.0.2",
     "uvu": "^0.3.3"
   }
 }
