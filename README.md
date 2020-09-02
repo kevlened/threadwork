@@ -1,14 +1,14 @@
-# needlework
+# threadwork
 Simple threading in Node.js
 
 ## Why
-Existing threading solutions stringify both function and arguments, then pass them to the worker. This creates friction when using dependencies in workers. `needlework` skips stringifying the function by using a reference instead. This drastically reduces the effort is creating a threaded function.
+Existing threading solutions stringify both function and arguments, then pass them to the worker. This creates friction when using dependencies in workers. `threadwork` skips stringifying the function by using a reference instead. This drastically reduces the effort is creating a threaded function.
 
 ## Example
 
 ```js
 // fibonacci.js
-const { ThreadPool } = require('needlework');
+const { ThreadPool } = require('threadwork');
 
 function fibonacci(n) {
 	if (n < 2) return n;

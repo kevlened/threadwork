@@ -1,6 +1,6 @@
 {
-  "name": "needlework",
-  "version": "0.2.2",
+  "name": "threadwork",
+  "version": "0.2.3",
   "main": "index.js",
   "types": "index.d.ts",
   "engines": {
@@ -26,11 +26,11 @@
     "types": "tsc index.js --declaration --allowJs --emitDeclarationOnly",
     "release": "yarn test && yarn types && git commit -am $npm_package_version && git tag $npm_package_version && git push && git push --tags && npm login && npm publish"
   },
-  "repository": "git@github.com:kevlened/needlework.git",
+  "repository": "git@github.com:kevlened/threadwork.git",
   "author": "Len Boyette <boyettel@gmail.com>",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/kevlened/needlework/issues"
+    "url": "https://github.com/kevlened/threadwork/issues"
   },
   "dependencies": {
     "callsites": "^3.1.0"
