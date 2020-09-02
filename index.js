@@ -23,7 +23,7 @@ async function wait(ms = 0) {
 	return new Promise(res => setTimeout(res, ms));
 }
 
-class Pool extends EventEmitter {
+class ThreadPool extends EventEmitter {
 	#workers;
 	#available;
 	#queue = [];
@@ -160,5 +160,5 @@ class Pool extends EventEmitter {
 }
 
 module.exports = {
-	Pool
+	ThreadPool
 };

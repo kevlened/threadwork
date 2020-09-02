@@ -8,14 +8,14 @@ Existing threading solutions stringify both function and arguments, then pass th
 
 ```js
 // fibonacci.js
-const { Pool } = require('needlework');
+const { ThreadPool } = require('needlework');
 
 function fibonacci(n) {
 	if (n < 2) return n;
 	return fibonacci(n - 1) + fibonacci(n - 2);
 }
 
-module.exports = new Pool({ task: fibonacci });
+module.exports = new ThreadPool({ task: fibonacci });
 ```
 
 ```js
@@ -61,7 +61,7 @@ const fibonacci = require('./fibonacci');
 
 ## API
 
-* `new Pool({ task, size })` - The primary class. It should be instantiated at the top-level and only once per file.
+* `new ThreadPool({ task, size })` - The primary class. It should be instantiated at the top-level and only once per file.
 	- `task` - The worker runs this function 
 	- `size` - The number of workers in the pool (defaults to the number of cores)
 

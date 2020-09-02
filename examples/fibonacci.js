@@ -1,4 +1,4 @@
-const { Pool } = require('../');
+const { ThreadPool } = require('../');
 
 function fibonacci(n) {
 	if (n === 'fail') throw new Error('failed');
@@ -6,4 +6,4 @@ function fibonacci(n) {
 	return fibonacci(n - 1) + fibonacci(n - 2);
 }
 
-module.exports = new Pool({ task: fibonacci });
+module.exports = new ThreadPool({ task: fibonacci });
