@@ -2,7 +2,7 @@
 Simple threading in Node.js
 
 ## Why
-Existing threading solutions stringify both function and arguments, then pass them to the worker. This creates friction when using dependencies in workers. `threadwork` skips stringifying the function by using a reference instead. This drastically reduces the effort is creating a threaded function.
+Most threading solutions stringify the function and arguments before passing them to a worker. Stringifying creates friction when using dependencies. `threadwork` skips stringifying the function by using a reference instead, reducing the effort to create a threaded function.
 
 ## Example
 
@@ -20,11 +20,11 @@ module.exports = new ThreadPool({ task: fibonacci });
 
 ```js
 // index.js
-const fibonacci = require('./fibonacci');
+const pool = require('./fibonacci');
 
 (async () => {
 	try {
-		const results = await fibonacci.all([10, 20, 30]);
+		const results = await pool.all([10, 20, 30]);
 		console.log(results); // [55, 6765, 832040]
 	} catch (e) {
 		console.log(e);
@@ -34,11 +34,11 @@ const fibonacci = require('./fibonacci');
 
 ## Queueing
 
-There's also a queue if you want more control
+Use a queue for more control
 
 ```js
 // index.js
-const fibonacci = require('./fibonacci');
+const pool = require('./fibonacci');
 
 (async () => {
 	try {
@@ -67,7 +67,7 @@ const fibonacci = require('./fibonacci');
 
 * `await pool.all([worker1arg, worker2arg, worker3arg])` - Manages queueing tasks with the pool automatically. Returns results in the order arguments are passed, similar to `Promise.all`. For convenience, you can only pass one argument to each worker by default.
 
-* `pool.queue(async function)` - Queues and executes the function provided. Usually, the method calls `pool.run`.
+* `pool.queue(async function)` - Queues and executes the function provided. Usually, the function provided will call `pool.run`.
 
 * `await pool.run(arg1, arg2, ...)` - Executes the task once with the arguments provided. Throws if there are no available workers in the pool.
 
