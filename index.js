@@ -141,6 +141,8 @@ class ThreadPool extends EventEmitter {
 	}
 
 	async onIdle() {
+		if (this.#available.length === this.#workers.length) return;
+
 		const promises = [
 			event(this, 'idle'),
 			event(this, 'error')
