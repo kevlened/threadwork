@@ -169,7 +169,7 @@ class ThreadPool extends EventEmitter {
 		const results = [];
 		for (let a = 0; a < args.length; a++) {
 			this.queue(async () => {
-				results[a] = await this.run(args[a]);
+				results[a] = await this.run(...args[a]);
 			});
 		}
 		await this.onIdle();

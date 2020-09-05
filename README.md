@@ -24,7 +24,11 @@ const pool = require('./fibonacci');
 
 (async () => {
 	try {
-		const results = await pool.all([10, 20, 30]);
+		const results = await pool.all([
+			[10],
+			[20],
+			[30]
+		]);
 		console.log(results); // [55, 6765, 832040]
 	} catch (e) {
 		console.log(e);
@@ -65,7 +69,7 @@ const pool = require('./fibonacci');
 	- `task` - The worker runs this function 
 	- `size` - The number of workers in the pool (defaults to the number of cores)
 
-* `await pool.all([worker1arg, worker2arg, worker3arg])` - Manages queueing tasks with the pool automatically. Returns results in the order arguments are passed, similar to `Promise.all`. For convenience, you can only pass one argument to each worker by default.
+* `await pool.all([worker1args, worker2args, worker3args])` - Manages queueing tasks with the pool automatically. Returns results in the order arguments are passed, similar to `Promise.all`.
 
 * `pool.queue(async function)` - Queues and executes the function provided. Usually, the function provided will call `pool.run`.
 
