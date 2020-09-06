@@ -1,11 +1,14 @@
 # threadwork
-Simple threading in Node.js
+Simple, no frills, threading in Node.js
 
 ## Why
+Other solutions were too complex. Many threading apps just need a way to create a thread pool and call the threaded function; that's what this does.
+
+## How
+<!-- 1) `threadwork` uses a dynamically sized thread pool. This uses memory wisely and prevents the thread from hanging when the node process exits. -->
 Most threading solutions stringify the function and arguments before passing them to a worker. Stringifying creates friction when using dependencies. `threadwork` skips stringifying the function by using a reference instead, reducing the effort to create a threaded function.
 
 ## Example
-
 ```js
 // fibonacci.js
 const { ThreadPool } = require('threadwork');
@@ -24,58 +27,30 @@ const pool = require('./fibonacci');
 
 (async () => {
 	try {
-		const results = await pool.all([
-			[10],
-			[20],
-			[30]
-		]);
-		console.log(results); // [55, 6765, 832040]
-	} catch (e) {
-		console.log(e);
-	}
-})();
-```
-
-## Queueing
-
-Use a queue for more control
-
-```js
-// index.js
-const pool = require('./fibonacci');
-
-(async () => {
-	try {
-		const results = [];
+		const promises = [];
 		for (const arg of [10, 20, 30]) {
-			// Queue up an async function
-			pool.queue(async () => {
-				// Get the results of a single run
-				const result = await pool.run(arg);
-				results.push(result);
-			});
+			promises.push(pool.run(arg));
 		}
-		await pool.onIdle();
+		const results = await Promise.all(promises);
 		console.log(results); // [55, 6765, 832040]
 	} catch (e) {
 		console.log(e);
+	} finally {
+		await pool.close();
 	}
 })();
 ```
 
 ## API
-
 * `new ThreadPool({ task, size })` - The primary class. It should be instantiated at the top-level and only once per file.
 	- `task` - The worker runs this function 
 	- `size` - The number of workers in the pool (defaults to the number of cores)
 
-* `await pool.all([worker1args, worker2args, worker3args])` - Manages queueing tasks with the pool automatically. Returns results in the order arguments are passed, similar to `Promise.all`.
-
-* `pool.queue(async function)` - Queues and executes the function provided. Usually, the function provided will call `pool.run`.
-
 * `await pool.run(arg1, arg2, ...)` - Executes the task once with the arguments provided. Throws if there are no available workers in the pool.
 
-* `await pool.onIdle()` - Resolves when the queue is empty or an error is thrown.
+* `await pool.all([worker1args, worker2args, worker3args])` - Convenience method to batch thread calls. Returns results in the order arguments are passed, similar to `Promise.all`.
+
+* `await pool.close()` - Finishes the remaining work, then terminates all workers.
 
 * `pool.isMainThread` - Allows logic based on whether we're in a worker or not.
 

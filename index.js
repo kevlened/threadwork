@@ -121,8 +121,17 @@ class ThreadPool extends EventEmitter {
 			throw new Error('Cannot call `Pool.run` from thread');
 		}
 
+		// Force the call to be async
+		await wait();
+
 		if (!this.#available.length) {
-			throw new Error('No workers available');
+			return new Promise((res, rej) => {
+				this.#queue.push(async () => {
+					try {
+						res(await this.#available.pop().run(args));
+					} catch (e) { rej(e); }
+				});
+			});
 		}
 
 		return this.#available.pop().run(args);
@@ -141,6 +150,9 @@ class ThreadPool extends EventEmitter {
 	}
 
 	async onIdle() {
+		// Force the call to be async
+		await wait();
+
 		if (this.#available.length === this.#workers.length) return;
 
 		const promises = [
