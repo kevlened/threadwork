@@ -23,6 +23,25 @@ async function wait(ms = 0) {
 	return new Promise(res => setTimeout(res, ms));
 }
 
+function inWorkerThread({ task }) {
+	// Listen for args from main
+	parentPort.on('message', async (args) => {
+		if (args === 'stop') {
+			parentPort.removeAllListeners();
+			return;
+		}
+
+		let result, err;
+		try {
+			result = await task(...args);
+		} catch (e) {
+			err = e;
+		}
+		// Send results to main
+		parentPort.postMessage({ result, err });
+	});
+}
+
 class ThreadPool extends EventEmitter {
 	#workers;
 	#available;
@@ -43,29 +62,13 @@ class ThreadPool extends EventEmitter {
 		super();
 
 		// If it's a worker thread
-		if (!isMainThread) {
-			// Listen for args from main
-			parentPort.on('message', async (args) => {
-				if (args === 'stop') {
-					parentPort.removeAllListeners();
-					return;
-				}
-
-				let result, err;
-				try {
-					result = await task(...args);
-				} catch (e) {
-					err = e;
-				}
-				// Send results to main
-				parentPort.postMessage({ result, err });
-			});
-			return;
-		}
+		if (!isMainThread) return inWorkerThread({ task });
 
 		size = size || os.cpus().length;
 		const workers = [];
 		const filename = callsites()[1].getFileName();
+
+		// FIXME: remove limitation
 		if (filesWithPool.has(filename)) {
 			throw new Error(`${filename} should only define one Pool`);
 		}
