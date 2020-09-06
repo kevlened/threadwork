@@ -29,10 +29,7 @@ export class ThreadPool extends ThreadPool_base {
      * @returns {Promise<any>}
      */
     run(...args: object[]): Promise<any>;
-    queue(fn: any): void;
-    onIdle(): Promise<void>;
     close(): Promise<void>;
-    all(args: any): Promise<any[]>;
     #private;
 }
 export {};
