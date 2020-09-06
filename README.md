@@ -48,9 +48,7 @@ const pool = require('./fibonacci');
 
 * `await pool.run(arg1, arg2, ...)` - Executes the task once with the arguments provided.
 
-* `await pool.all([worker1args, worker2args, worker3args])` - Convenience method to batch thread calls. Returns results in the order arguments are passed, similar to `Promise.all`.
-
-* `await pool.close()` - Finishes the remaining work, then terminates all workers.
+* `await pool.close()` - Terminates all the workers, allowing the process to exit.
 
 * `pool.isMainThread` - Allows logic based on whether we're in a worker or not.
 

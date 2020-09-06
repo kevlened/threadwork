@@ -137,55 +137,14 @@ class ThreadPool extends EventEmitter {
 		return this.#available.pop().run(args);
 	}
 
-	queue(fn) {
-		if (!isMainThread) {
-			throw new Error('Cannot call `Pool.queue` from thread');
-		}
-
-		// If we have idle workers, start
-		if (this.#available.length) fn();
-
-		// Add the function to the queue
-		else this.#queue.push(fn);
-	}
-
-	async onIdle() {
-		// Force the call to be async
-		await wait();
-
-		if (this.#available.length === this.#workers.length) return;
-
-		const promises = [
-			event(this, 'idle'),
-			event(this, 'error')
-		];
-		const e = await Promise.race(promises);
-
-		// FIXME: fixes memory leak, but causes trouble if there
-		//				are multiple onIdle listeners
-		this.removeAllListeners();
-
-		if (e) throw e;
-	}
-
 	async close() {
-		await this.onIdle();
 		for (const worker of this.#workers) {
 			worker.postMessage('stop');
 			worker.removeAllListeners();
+			worker.terminate();
+			worker.unref();
 		}
 		this.removeAllListeners();
-	}
-
-	async all(args) {
-		const results = [];
-		for (let a = 0; a < args.length; a++) {
-			this.queue(async () => {
-				results[a] = await this.run(...args[a]);
-			});
-		}
-		await this.onIdle();
-		return results;
 	}
 }
 

@@ -6,20 +6,20 @@ const pool = require('./examples/fibonacci');
 const cores = os.cpus().length;
 
 test('pool.all', async () => {
-  const results = await pool.all([
-		[ 10 ],
-		[ 20 ],
-		[ 30 ]
+  const results = await Promise.all([
+		pool.run(10),
+		pool.run(20),
+		pool.run(30),
 	]);
 	assert.equal(results, [ 55, 6765, 832040 ]);
 });
 
 test('pool.all - error', async () => {
 	try {
-		await pool.all([
-			[ 10 ],
-			[ 20 ],
-			[ 'fail' ]
+		await Promise.all([
+			pool.run(10),
+			pool.run(20),
+			pool.run('fail'),
 		]);
 		assert.unreachable('should have thrown');
 	} catch (e) {
