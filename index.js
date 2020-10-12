@@ -47,6 +47,7 @@ class ThreadPool extends EventEmitter {
 	#workers;
 	#available;
 	#queue = [];
+	#promises = [];
 
 	/**
 	 * Determines if you're currently running in the main or thread context
@@ -140,7 +141,32 @@ class ThreadPool extends EventEmitter {
 		return this.#available.pop().run(args);
 	}
 
+	/**
+	 * Queue several functions
+	 * 
+	 * @param {function} fn - Function to queue
+	 * @returns {Promise<any>}
+	 */
+	queue(fn) {
+		this.#promises.push(fn());
+	}
+
+	/**
+	 * Wait until the queue is empty
+	 * @returns {Promise<any>}
+	 */
+	async wait() {
+		await Promise.all(this.#promises);
+		this.#promises = [];
+	}
+
+	/**
+	 * Wait until the queue is empty, then terminate all listeners
+	 * @returns {Promise<any>}
+	 */
 	async close() {
+		await this.wait();
+
 		for (const worker of this.#workers) {
 			worker.postMessage('stop');
 			worker.removeAllListeners();

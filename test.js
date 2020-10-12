@@ -5,6 +5,8 @@ const pool = require('./examples/fibonacci');
 
 const cores = os.cpus().length;
 
+const wait = ms => new Promise(res => setTimeout(res, ms));
+
 test('pool.all', async () => {
   const results = await Promise.all([
 		pool.run(10),
@@ -56,6 +58,25 @@ test('pool.run - allows more than one pool per file', async () => {
 		pool3.run(10)
 	]);
 	assert.equal(results, [ 55, 54, 53 ]);
+});
+
+test('pool.queue - allows queue management', async () => {
+	const results = [];
+	pool.queue(async () => {
+		await wait(1);
+		results[0] = await pool.run(10);
+	});
+	pool.queue(async () => {
+		await wait(1);
+		results[1] = await pool.run(20);
+	});
+	pool.queue(async () => {
+		await wait(1);
+		results[2] = await pool.run(30);
+	});
+	await pool.wait();
+
+	assert.equal(results, [ 55, 6765, 832040 ]);
 });
 
 test.run();
