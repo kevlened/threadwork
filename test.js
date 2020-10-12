@@ -48,4 +48,14 @@ test('pool.run - queue', async () => {
 	].slice(0, runs));
 });
 
+test('pool.run - allows more than one pool per file', async () => {
+	const { pool1, pool2, pool3 } = require('./examples/multiple');
+	const results = await Promise.all([
+		pool1.run(10),
+		pool2.run(10),
+		pool3.run(10)
+	]);
+	assert.equal(results, [ 55, 54, 53 ]);
+});
+
 test.run();

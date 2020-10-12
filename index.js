@@ -1,13 +1,12 @@
 const {
 	Worker,
 	isMainThread,
-	parentPort
+	parentPort,
+	workerData
 } = require('worker_threads');
 const callsites = require('callsites');
 const os = require('os');
 const { EventEmitter } = require('events');
-
-const filesWithPool = new Set();
 
 async function event(emitter, name) {
 	return new Promise(res => {
@@ -23,7 +22,9 @@ async function wait(ms = 0) {
 	return new Promise(res => setTimeout(res, ms));
 }
 
-function inWorkerThread({ task }) {
+function inWorkerThread({ workerId, task }) {
+	if (workerData.workerId !== workerId) return;
+
 	// Listen for args from main
 	parentPort.on('message', async (args) => {
 		if (args === 'stop') {
@@ -61,23 +62,22 @@ class ThreadPool extends EventEmitter {
 	constructor({ task, size }) {
 		super();
 
-		// If it's a worker thread
-		if (!isMainThread) return inWorkerThread({ task });
-
 		size = size || os.cpus().length;
 		const workers = [];
-		const filename = callsites()[1].getFileName();
+		const callsite = callsites()[1];
+		const filename = callsite.getFileName();
+		const line = callsite.getLineNumber();
+		const column = callsite.getColumnNumber();
 
-		// FIXME: remove limitation
-		if (filesWithPool.has(filename)) {
-			throw new Error(`${filename} should only define one Pool`);
-		}
-		filesWithPool.add(filename);
+		const workerId = `${filename}[${line}][${column}]`;
+
+		// If it's a worker thread
+		if (!isMainThread) return inWorkerThread({ workerId, task });
 		
 		// Main creates a pool of workers
 		for (let i = 0; i < size; i++) {
 
-			const worker = new Worker(filename);
+			const worker = new Worker(filename, { workerData: { workerId }});
 			worker.run = async args => {
 				// Stage promise
 				const promise = event(worker, 'finished');
