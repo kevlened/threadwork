@@ -29,7 +29,23 @@ export class ThreadPool extends ThreadPool_base {
      * @returns {Promise<any>}
      */
     run(...args: object[]): Promise<any>;
-    close(): Promise<void>;
+    /**
+     * Queue several functions
+     *
+     * @param {function} fn - Function to queue
+     * @returns {Promise<any>}
+     */
+    queue(fn: Function): Promise<any>;
+    /**
+     * Wait until the queue is empty
+     * @returns {Promise<any>}
+     */
+    wait(): Promise<any>;
+    /**
+     * Wait until the queue is empty, then terminate all listeners
+     * @returns {Promise<any>}
+     */
+    close(): Promise<any>;
     #private;
 }
 export {};
