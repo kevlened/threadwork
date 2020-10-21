@@ -5,7 +5,10 @@ const {
 	workerData
 } = require('worker_threads');
 const callsites = require('callsites');
+const pkgDir = require('pkg-dir');
 const os = require('os');
+const path = require('path');
+const fs = require('fs');
 const { EventEmitter } = require('events');
 
 async function event(emitter, name) {
@@ -23,6 +26,8 @@ async function wait(ms = 0) {
 }
 
 function inWorkerThread({ workerId, task }) {
+	// This is necessary, because a single file would
+	// start multiple listeners otherwise.
 	if (workerData.workerId !== workerId) return;
 
 	// Listen for args from main
@@ -42,6 +47,8 @@ function inWorkerThread({ workerId, task }) {
 		parentPort.postMessage({ result, err });
 	});
 }
+
+let fileCallCount = {};
 
 class ThreadPool extends EventEmitter {
 	#workers;
@@ -66,11 +73,51 @@ class ThreadPool extends EventEmitter {
 		size = size || os.cpus().length;
 		const workers = [];
 		const callsite = callsites()[1];
-		const filename = callsite.getFileName();
 		const line = callsite.getLineNumber();
 		const column = callsite.getColumnNumber();
 
-		const workerId = `${filename}[${line}][${column}]`;
+		let filename = callsite.getFileName();
+		let workerId = `${filename}[${line}][${column}]`;
+
+		const tsCacheDirectory = process.env.TS_NODE_DEV_CACHE &&
+			path.join(process.env.TS_NODE_DEV_CACHE, 'compiled');
+
+		let isTsNodeDev = false;
+
+		if (
+			(isMainThread && process.env.TS_NODE_DEV && path.extname(filename) === '.ts') ||
+			(workerData && workerData.isTsNodeDev)
+		) {
+			isTsNodeDev = true;
+			
+			if (!tsCacheDirectory) {
+				throw new Error(
+					'To use ts-node-dev with threadwork, TS_NODE_DEV_CACHE must be defined and match the cache-directory argument to ts-node-dev'
+				);
+			}
+
+			const packageDir = pkgDir.sync();
+			const prefix = path.relative(packageDir, filename).replace(/[^\w]/g, '_');
+
+			// Loop through all files in the directory looking for the right one
+			let newestTime = 0;
+
+			for (const file of fs.readdirSync(tsCacheDirectory)) {
+				if (file.startsWith(prefix) && path.extname(file) === '.js') {
+					const fullPath = path.join(packageDir, tsCacheDirectory, file);
+					const stat = fs.statSync(fullPath);
+					if (stat.birthtimeMs > newestTime) {
+						newestTime = stat.birthtimeMs;
+						filename = fullPath;
+					}
+				}
+			}
+
+			fileCallCount[filename] = fileCallCount[filename] || 0;
+			fileCallCount[filename]++;
+
+			workerId = `${filename}[${fileCallCount[filename]}]`;
+		}
 
 		// If it's a worker thread
 		if (!isMainThread) return inWorkerThread({ workerId, task });
@@ -78,7 +125,7 @@ class ThreadPool extends EventEmitter {
 		// Main creates a pool of workers
 		for (let i = 0; i < size; i++) {
 
-			const worker = new Worker(filename, { workerData: { workerId }});
+			const worker = new Worker(filename, { workerData: { workerId, isTsNodeDev }});
 			worker.run = async args => {
 				// Stage promise
 				const promise = event(worker, 'finished');
@@ -117,7 +164,7 @@ class ThreadPool extends EventEmitter {
 	/**
 	 * Create a thread pool that runs a specific function
 	 * 
-	 * @param {...object} args - Arguments passed to the configured task.
+	 * @param {...any} args - Arguments passed to the configured task.
 	 * @returns {Promise<any>}
 	 */
 	async run(...args) {

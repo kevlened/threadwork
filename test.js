@@ -79,4 +79,6 @@ test('pool.queue - allows queue management', async () => {
 	assert.equal(results, [ 55, 6765, 832040 ]);
 });
 
+// TODO: add a test for ts-node-dev
+
 test.run();

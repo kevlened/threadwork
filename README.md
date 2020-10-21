@@ -55,6 +55,16 @@ const pool = require('./fibonacci');
 ## Compatibility
 Node.js 12+ for stable `worker_threads`
 
+### ts-node-dev
+There's best-effort support for ts-node-dev. You must provide the following:
+1) `TS_NODE_DEV_CACHE` as an environment variable
+2) The same directory should be provided to `ts-node-dev` via `--cache-directory`
+
+CLI example:
+```bash
+TS_NODE_DEV_CACHE=.ts-node tsnd --cache-directory $TS_NODE_DEV_CACHE --respawn index.ts
+```
+
 ## License
 MIT
 

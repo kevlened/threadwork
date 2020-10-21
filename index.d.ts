@@ -25,10 +25,10 @@ export class ThreadPool extends ThreadPool_base {
     /**
      * Create a thread pool that runs a specific function
      *
-     * @param {...object} args - Arguments passed to the configured task.
+     * @param {...any} args - Arguments passed to the configured task.
      * @returns {Promise<any>}
      */
-    run(...args: object[]): Promise<any>;
+    run(...args: any[]): Promise<any>;
     /**
      * Queue several functions
      *
